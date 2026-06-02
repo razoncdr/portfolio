@@ -1,36 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Rejwanul Haque Rajon — Portfolio
 
-## Getting Started
+Personal portfolio site. Single-page, responsive, statically rendered.
 
-First, run the development server:
+**Stack:** [Next.js 16](https://nextjs.org) (App Router) · TypeScript · [Tailwind CSS v4](https://tailwindcss.com) · deployed on [Vercel](https://vercel.com).
+
+## Getting started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev      # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Other scripts: `npm run build` (production build + type-check + lint), `npm start` (serve the build), `npm run lint`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Editing content
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+All copy and data live in **`src/content/profile.ts`** — the single source of truth.
+Update your rating, add a project, tweak a bullet there; you shouldn't need to touch
+any component.
 
-## Learn More
+## Project structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+  content/profile.ts     # all site data (typed) — edit this
+  lib/site.ts            # canonical site URL (env-aware)
+  components/
+    ui/                  # Section, Card, Badge, StatChip, icons — design primitives
+    layout/              # Header, Footer
+    sections/            # Hero, About, Skills, Experience, Projects,
+                         #   Achievements, Education, Contact
+  app/
+    layout.tsx           # fonts + SEO metadata + Header/Footer + skip link
+    page.tsx             # composes the sections in order
+    globals.css          # semantic color tokens (Tailwind v4 @theme)
+    opengraph-image.tsx  # generated social-share card
+    sitemap.ts / robots.ts
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Colors are routed through semantic CSS variables in `globals.css`, so theming changes
+happen in one place.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Environment variables
 
-## Deploy on Vercel
+| Variable | Purpose |
+|---|---|
+| `NEXT_PUBLIC_SITE_URL` | Your production URL (e.g. `https://your-domain.com`). Used by `metadataBase`, the sitemap, robots, and OG image to emit absolute URLs. Set it in **Vercel → Settings → Environment Variables** (Production + Preview). Falls back to Vercel's own URL, then `localhost`. |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Deploy
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Push to GitHub, then import the repo at [vercel.com/new](https://vercel.com/new). Vercel
+auto-detects Next.js and runs `next build`. After that:
+
+- push to `main` → **production** deploy
+- push to any branch / open a PR → **preview** deploy with its own URL
+
+## Roadmap
+
+Planned phases (structured so each slots in cleanly):
+
+- [ ] Contact form (route handler + Resend/Formspree)
+- [ ] MDX blog / writing section
+- [ ] Dark / light mode toggle
+- [ ] Live Codeforces stats via the CF public API
