@@ -14,7 +14,18 @@ export function Achievements() {
         {profile.achievements.map((item) => (
           <Fragment key={item.category}>
             <dt className="font-mono text-sm font-medium text-accent">
-              {item.category}
+              {item.href ? (
+                <a
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline-offset-2 hover:underline"
+                >
+                  {item.category} ↗
+                </a>
+              ) : (
+                item.category
+              )}
             </dt>
             <dd className="text-sm leading-relaxed text-muted">{item.detail}</dd>
           </Fragment>
