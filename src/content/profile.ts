@@ -47,6 +47,8 @@ export type Project = {
 export type Achievement = {
   category: string;
   detail: string;
+  /** optional profile link — category renders as a link when present */
+  href?: string;
 };
 
 export type Education = {
@@ -115,9 +117,9 @@ export const profile: Profile = {
     },
     {
       label: "LinkedIn",
-      href: "https://linkedin.com/in/rejwanul-haque-rajon",
+      href: "https://www.linkedin.com/in/rejwanul-haque-rajon-4b37aa282/",
       icon: "linkedin",
-      handle: "in/rejwanul-haque-rajon",
+      handle: "in/rejwanul-haque-rajon-4b37aa282",
     },
     {
       // NOTE: verify this handle — I assumed "razoncdr" to match your GitHub/AtCoder.
@@ -230,6 +232,7 @@ export const profile: Profile = {
       description:
         "Generic Repository + Unit of Work pattern, topological sort & DSU for task ordering, pagination, email verification, AJAX modals, and secure file attachments.",
       stack: ["ASP.NET Core", "Clean Architecture", "SQL Server", "RBAC"],
+      repo: "https://github.com/Learnathon-By-Geeky-Solutions/brainstormers/tree/main/TaskForge.NET",
     },
     {
       name: "TeamSync",
@@ -238,6 +241,7 @@ export const profile: Profile = {
         "JWT authentication, event-driven notifications, and live chat over SignalR — an end-to-end real-time collaboration workspace.",
       stack: [".NET 8", "Angular", "MongoDB", "Redis", "RabbitMQ", "SignalR"],
       status: "In progress",
+      repo: "https://github.com/razoncdr/TeamSync",
     },
     {
       name: "Hall Management System",
@@ -245,6 +249,7 @@ export const profile: Profile = {
       description:
         "Room allocation, fee tracking, and admin tools built on an ER-diagram-driven schema.",
       stack: ["Django", "Bootstrap", "SQLite"],
+      repo: "https://github.com/razoncdr/Hall_Mangement_System",
     },
   ],
   achievements: [
@@ -260,10 +265,17 @@ export const profile: Profile = {
     {
       category: "Codeforces",
       detail: "Expert · max rating 1745 · 1700+ problems solved",
+      href: "https://codeforces.com/profile/razoncdr",
     },
     {
       category: "CodeChef",
       detail: "5★ · max rating 2022 · 250+ problems solved",
+      href: "https://www.codechef.com/users/razoncdr",
+    },
+    {
+      category: "AtCoder",
+      detail: "razoncdr",
+      href: "https://atcoder.jp/users/razoncdr",
     },
   ],
   education: [
@@ -274,5 +286,5 @@ export const profile: Profile = {
       result: "CGPA 3.89 / 4.0",
     },
   ],
-  languages: ["Bengali (Native)", "English (Intermediate)"],
+  languages: ["Bengali (Native)", "English (Intermediate)", "Hindi (Spoken)"],
 };
