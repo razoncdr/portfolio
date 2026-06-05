@@ -5,6 +5,41 @@ blog section of this site.
 
 ---
 
+## 2026-06-06 — Contact form (Server Actions, spam defense, real secrets)
+
+**What I did**
+
+- Replaced "email me" with a real contact form: a Server Action validates the
+  submission, rate-limits by IP, and delivers it to my inbox via Resend's REST
+  API (recipient address lives in a server-only env var — invisible to
+  visitors). Direct links stay as the always-works fallback.
+- Layered spam defense: honeypot field → server-side validation → per-IP rate
+  limit (5/hour via Upstash Redis) → hardcoded recipient → Resend's daily cap
+  as the final circuit breaker.
+
+**What I learned**
+
+- **Server Actions**: a `"use server"` function passed to `<form action={...}>`
+  — no hand-written API route, and `useActionState` returns the action's
+  result + a pending flag. Because it's a real form post, it works even before
+  hydration (progressive enhancement).
+- **Client-side validation is UX; server-side validation is security.** The
+  `required`/`maxLength` attributes help honest users; bots POST whatever they
+  want, so every rule is re-checked on the server.
+- **Serverless functions are stateless** — an in-memory rate-limit counter
+  resets between invocations because each request may hit a fresh instance.
+  Shared state needs external storage (Upstash Redis, REST API, no SDK).
+- **Fail open vs fail closed is a per-layer decision**: the rate limiter fails
+  open (Redis down shouldn't kill the form — other layers still protect), but
+  the refresh endpoint fails closed (no secret configured = refuse everyone).
+- A leaked `RESEND_API_KEY` would let someone send email through my account —
+  unlike my low-stakes refresh secret. Same mechanism (env vars), very
+  different blast radius.
+- Email plus-addressing (`me+portfolio@gmail.com`) gives free
+  filtering/labeling — same inbox, distinct address per source.
+- `reply_to` on the outgoing mail = hitting Reply in Gmail answers the visitor
+  directly, even though the mail technically came from Resend.
+
 ## 2026-06-06 — MDX blog (file-based routing, dynamic routes, generateMetadata)
 
 **What I did**
