@@ -64,11 +64,28 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+    /*
+     * suppressHydrationWarning: the pre-paint script below may add `dark` to
+     * <html> before React hydrates, so the server HTML (no class) and the
+     * client DOM can legitimately differ on this one element.
+     */
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full`}
     >
       <body className="flex min-h-full flex-col font-sans antialiased">
+        {/*
+          Anti-FOUC theme script. Runs synchronously BEFORE the page paints:
+          reads the saved choice (localStorage) or falls back to the OS
+          preference, and sets the `dark` class immediately. Without this,
+          dark-mode visitors would see a white flash on every load.
+        */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem("theme");var d=t?t==="dark":window.matchMedia("(prefers-color-scheme: dark)").matches;if(d)document.documentElement.classList.add("dark")}catch(e){}})()`,
+          }}
+        />
         {/* Skip link for keyboard / screen-reader users (WCAG 2.4.1). */}
         <a
           href="#top"
