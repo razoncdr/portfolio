@@ -1,20 +1,24 @@
 import { profile } from "@/content/profile";
 import { Section } from "@/components/ui/Section";
+import { ContactForm } from "@/components/ui/ContactForm";
 import { icons, ArrowUpRightIcon } from "@/components/ui/icons";
 
 /**
- * Contact = links only for the MVP (no form yet, by design).
- * Phase-2 note: a <ContactForm /> client component will slot in directly above
- * this list, posting to an app/api/contact route handler (Resend/Formspree).
- * The links below stay as the always-works fallback.
+ * Contact form (Server Action → Resend) with the direct links kept below as
+ * the always-works fallback — if the form or email service ever has a bad
+ * day, visitors still have a way to reach out.
  */
 export function Contact() {
   return (
     <Section id="contact" title="Contact">
       <p className="max-w-2xl text-base leading-relaxed text-muted">
         I&apos;m open to backend and full-stack roles, and always happy to talk
-        shop. The fastest way to reach me is email — or find me on the links below.
+        shop. Send a message right here — or reach me on the links below.
       </p>
+
+      <div className="mt-8">
+        <ContactForm />
+      </div>
 
       <ul className="mt-6 grid gap-3 sm:grid-cols-2">
         {profile.socials.map((social) => {
