@@ -1,0 +1,38 @@
+export const meta = {
+  title: "Dark mode without rewrites: tokens, FOUC, and my first client component",
+  description:
+    "The entire dark theme turned out to be one CSS block — plus what I learned about hydration, pre-paint scripts, and keeping the client boundary tiny.",
+  date: "2026-06-05",
+};
+
+Adding dark mode is famous for turning into a restyling project. Mine was one
+CSS block — because of a decision made weeks earlier that had nothing to do
+with dark mode.
+
+## What I did
+
+- Declared the dark palette as a single `.dark { ... }` block that overrides
+  the same semantic CSS variables the light theme defines. Zero component
+  changes — every component already read tokens like `bg-background` and
+  `text-accent`.
+- Built my first **client component**: a stateless `ThemeToggle` button.
+- Added a tiny **pre-paint script** so dark-mode visitors never see a white
+  flash.
+
+## What I learned
+
+- **Keep the `"use client"` boundary as small as possible.** Everything stays
+  server-rendered except the one button that needs `onClick`.
+- **The anti-FOUC pattern**: a blocking inline `<script>` runs *before paint*,
+  reads `localStorage` / `prefers-color-scheme`, and sets the `dark` class on
+  `<html>`. Without it, every page load flashes light before going dark. React
+  then needs `suppressHydrationWarning` on `<html>`, because the server HTML
+  (classless) legitimately differs from the client DOM.
+- **Avoid hydration mismatches by avoiding divergent state.** Instead of JS
+  deciding which icon to show, I render *both* sun and moon and let CSS
+  (`dark:hidden` / `dark:block`) pick. Server and client markup stay
+  identical, so there's nothing to mismatch.
+- Tailwind v4's `dark:` variant follows the OS setting by default; a
+  class-based toggle needs `@custom-variant dark (&:where(.dark, .dark *))`.
+- `color-scheme: dark` makes native scrollbars and form controls match the
+  theme — a one-line detail that's very visible when missing.

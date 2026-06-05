@@ -59,7 +59,7 @@ auto-detects Next.js and runs `next build`. After that:
 
 Planned phases (structured so each slots in cleanly):
 
+- [x] Dark / light mode toggle
+- [x] Live LeetCode stats (public GraphQL API + ISR; replaced the original live-Codeforces idea)
+- [x] MDX blog / writing section (`/blog`, posts in `src/content/posts/`)
 - [ ] Contact form (route handler + Resend/Formspree)
-- [ ] MDX blog / writing section
-- [ ] Dark / light mode toggle
-- [ ] Live Codeforces stats via the CF public API

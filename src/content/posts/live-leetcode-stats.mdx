@@ -1,0 +1,46 @@
+export const meta = {
+  title: "Live LeetCode stats with ISR — and why I killed my first version",
+  description:
+    "Invisible dynamism is worthless: pivoting from live Codeforces ratings to LeetCode solved counts, with ISR, route handlers, and my first env secret.",
+  date: "2026-06-06",
+};
+
+My first attempt at "live stats" fetched my Codeforces max rating from their
+API. It worked perfectly — and was completely pointless: max rating is
+*historical*, so the live value rendered identically to a hardcoded string.
+I shipped a feature nobody could tell existed. So I killed it.
+
+## What I did
+
+- Abandoned the live-Codeforces branch unmerged (that's what branches are for
+  — production never knew it existed) and rebuilt around **LeetCode solved
+  counts**, data that actually moves.
+- Fetched total + Easy/Medium/Hard counts server-side from LeetCode's public
+  GraphQL endpoint, revalidated hourly, with a pulsing "live" dot so the
+  freshness is visible.
+- Added a secret-protected route handler (`/api/refresh-stats?secret=...`) so
+  *I* can force an instant refresh after a grind session — my first API route
+  and my first environment-variable secret.
+
+## What I learned
+
+- **Make things dynamic only when the data moves.** Otherwise you're paying
+  complexity for a feature that's indistinguishable from static text.
+- **ISR is lazy, not a cron.** `revalidate = 3600` doesn't poll hourly:
+  visitors always get the cached page instantly, and only a visit *after* the
+  hour triggers one background re-fetch (stale-while-revalidate). Zero traffic
+  means zero API calls; heavy traffic still means at most one call per hour.
+- **Next's fetch-level data cache only covers GET.** GraphQL needs POST, so
+  the route-segment config `export const revalidate = 3600` governs freshness
+  instead.
+- **On-demand revalidation**: `revalidatePath("/")` in a route handler purges
+  the cache immediately. Protect such endpoints with an env-var secret and
+  make them **fail closed** — if the secret isn't configured, refuse everyone.
+- **Why no visitor-facing refresh button?** Browsers can't call LeetCode
+  directly (CORS), so a button means a proxy API + client state + rate
+  limiting — a real abuse surface for a number no visitor needs in realtime.
+  Realtime UX is for per-minute data like scores and prices, not slow counts.
+- **External APIs are dependencies you don't control**: validate the response
+  shape and design the failure path first. My fetcher returns `null` on any
+  problem and the UI falls back to static values — a LeetCode outage can never
+  break the site.

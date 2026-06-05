@@ -10,14 +10,19 @@ import { ThemeToggle } from "@/components/ui/ThemeToggle";
  * Social icons are derived from profile.socials + the shared icons map (no
  * hardcoded URLs). The theme toggle sits with them on the right.
  */
+/*
+ * Hrefs are rooted ("/#about", not "#about") so they work from ANY route —
+ * a bare "#about" on /blog would resolve to /blog#about and go nowhere.
+ */
 const NAV = [
-  { href: "#about", label: "About" },
-  { href: "#skills", label: "Skills" },
-  { href: "#experience", label: "Experience" },
-  { href: "#projects", label: "Projects" },
-  { href: "#achievements", label: "Achievements" },
-  { href: "#education", label: "Education" },
-  { href: "#contact", label: "Contact" },
+  { href: "/#about", label: "About" },
+  { href: "/#skills", label: "Skills" },
+  { href: "/#experience", label: "Experience" },
+  { href: "/#projects", label: "Projects" },
+  { href: "/#achievements", label: "Achievements" },
+  { href: "/#education", label: "Education" },
+  { href: "/blog", label: "Blog" },
+  { href: "/#contact", label: "Contact" },
 ];
 
 const HEADER_SOCIALS = ["github", "linkedin"] as const;
@@ -31,7 +36,7 @@ export function Header() {
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur">
       <div className="mx-auto flex h-14 w-full max-w-4xl items-center justify-between px-6">
         <a
-          href="#top"
+          href="/"
           className="font-mono text-sm font-semibold text-foreground transition-colors hover:text-accent"
         >
           {profile.name.split(" ")[0].toLowerCase()}

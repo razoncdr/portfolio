@@ -5,6 +5,37 @@ blog section of this site.
 
 ---
 
+## 2026-06-06 — MDX blog (file-based routing, dynamic routes, generateMetadata)
+
+**What I did**
+
+- Added a blog: posts are `.mdx` files in `src/content/posts/`, listed in a
+  small typed registry (`posts.ts`). Adding a post = one file + one slug line.
+- Seeded it by converting this learning log's first five entries into the
+  first five published posts.
+- `/blog` index + `/blog/[slug]` dynamic route, every post prerendered at
+  build time; per-post SEO; posts auto-join the sitemap.
+
+**What I learned**
+
+- **Dynamic routes**: `[slug]` folders catch URL segments;
+  `generateStaticParams` tells Next every valid value at build time so all
+  posts prerender as static HTML; `dynamicParams = false` turns unknown slugs
+  into 404s instead of server work.
+- **`generateMetadata`** gives each post its own title/description/OG tags
+  from the post's own `meta` export — and the `title.template` wired up in
+  Phase 1 finally earns its keep ("Post Title · Name").
+- **MDX = markdown + React**: `@next/mdx` compiles `.mdx` files into server
+  components. The mandatory `mdx-components.tsx` maps every markdown element
+  (h2, p, code, ...) to token-styled components — so posts automatically match
+  the design system *and* dark mode with no typography plugin.
+- **Root-relative anchors matter on multi-page sites**: nav links like
+  `#about` silently break once a second route exists (they resolve to
+  `/blog#about`); they must be `/#about`. Same class of bug for the skip link.
+- Module-scoped content (a typed registry + dynamic `import()` of MDX) beats
+  filesystem reads: the bundler validates every import at build time, so a
+  typo'd slug is a build error, not a runtime 404.
+
 ## 2026-06-06 — Live LeetCode stats (ISR, route handlers, env secrets)
 
 **What I did**
