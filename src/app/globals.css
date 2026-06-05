@@ -1,18 +1,22 @@
 @import "tailwindcss";
 
 /*
+  Class-based dark variant (Tailwind v4): `dark:` utilities apply when an
+  ancestor has the .dark class (instead of following the OS setting blindly).
+  The class is set on <html> by the pre-paint script in layout.tsx and toggled
+  by the ThemeToggle component.
+*/
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
   Design tokens — single source of truth for the palette.
   Components reference these via Tailwind utilities (bg-background, text-foreground,
-  text-accent, border-border, ...).
-
-  Dark mode (Phase 3): override these variables under a `.dark` selector and add a
-  toggle — no *reusable-component* changes required. One caveat to plan for: a
-  flicker-free toggle also needs a one-time layout.tsx touch (a blocking inline
-  <script> in the document that sets documentElement.classList from
-  localStorage/matchMedia BEFORE paint, plus suppressHydrationWarning on <html>),
-  or simply adopt `next-themes`, which handles both.
+  text-accent, border-border, ...) and NEVER hardcode colors. That's why the entire
+  dark theme below is just a re-declaration of the same variables under `.dark` —
+  no component changes required.
 */
 :root {
+  color-scheme: light;
   --background: #f8fafc; /* slate-50  — page background */
   --surface: #ffffff; /* white     — cards */
   --surface-2: #f1f5f9; /* slate-100 — subtle fills / chips */
@@ -25,11 +29,25 @@
   --accent-foreground: #ffffff;
 }
 
+.dark {
+  color-scheme: dark; /* native scrollbars / form controls go dark too */
+  --background: #0f172a; /* slate-900 */
+  --surface: #1e293b; /* slate-800 — cards */
+  --surface-2: #283447; /* slate-800/700 — chips */
+  --foreground: #f1f5f9; /* slate-100 — headings */
+  --muted: #cbd5e1; /* slate-300 — body copy */
+  --subtle: #94a3b8; /* slate-400 — meta */
+  --border: #334155; /* slate-700 — hairlines */
+  --accent: #3b82f6; /* blue-500 — brighter for contrast on dark */
+  --accent-hover: #60a5fa; /* blue-400 */
+  --accent-foreground: #0f172a; /* dark text on the bright-blue button (AA contrast) */
+}
+
 /*
   `@theme inline` maps our CSS variables into Tailwind's color/font namespace so that
   utilities like `bg-background`, `text-accent`, `font-mono`, and opacity modifiers
-  (`bg-accent/10`) are generated. `inline` keeps the var reference (needed for the
-  next/font variables, which are injected at runtime on <html>).
+  (`bg-accent/10`) are generated. `inline` keeps the var reference (needed both for
+  the runtime-injected next/font variables and for the .dark overrides above).
 */
 @theme inline {
   --color-background: var(--background);

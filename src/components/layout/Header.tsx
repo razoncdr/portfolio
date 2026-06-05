@@ -1,5 +1,6 @@
 import { profile } from "@/content/profile";
 import { icons } from "@/components/ui/icons";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 /**
  * Sticky top nav. Anchor links scroll to in-page sections (smooth scroll is
@@ -7,8 +8,7 @@ import { icons } from "@/components/ui/icons";
  * the social icons stay visible so mobile visitors always have an exit.
  *
  * Social icons are derived from profile.socials + the shared icons map (no
- * hardcoded URLs). Phase-3 note: the dark-mode toggle button slots in here,
- * to the right of the nav.
+ * hardcoded URLs). The theme toggle sits with them on the right.
  */
 const NAV = [
   { href: "#about", label: "About" },
@@ -51,6 +51,7 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-3">
+          <ThemeToggle />
           {socials.map((social) => {
             const Icon = icons[social.icon];
             return (
