@@ -71,6 +71,9 @@ export type Stat = {
   source?: "codeforces" | "codechef" | "icpc" | "problems";
 };
 
+/** Codeforces handle — used by the socials link and the live-stats fetcher. */
+export const codeforcesHandle = "razoncdr";
+
 export type Profile = {
   name: string;
   title: string;
@@ -122,12 +125,10 @@ export const profile: Profile = {
       handle: "in/rejwanul-haque-rajon-4b37aa282",
     },
     {
-      // NOTE: verify this handle — I assumed "razoncdr" to match your GitHub/AtCoder.
-      // Update href + handle in this one place if your Codeforces handle differs.
       label: "Codeforces",
-      href: "https://codeforces.com/profile/razoncdr",
+      href: `https://codeforces.com/profile/${codeforcesHandle}`,
       icon: "codeforces",
-      handle: "codeforces.com/profile/razoncdr",
+      handle: `codeforces.com/profile/${codeforcesHandle}`,
     },
   ],
   stats: [

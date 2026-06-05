@@ -5,6 +5,33 @@ blog section of this site.
 
 ---
 
+## 2026-06-06 — Live Codeforces stats (server-side fetching + ISR)
+
+**What I did**
+
+- The Codeforces stat chip in the hero now fetches my real rating from the CF
+  public API (`user.info`), server-side, revalidated hourly. When my max rating
+  changes, the site updates itself — no commit needed.
+- Tagged stat targeting paid off: the fetcher overrides exactly the stat with
+  `source: "codeforces"`; all other chips stay static.
+
+**What I learned**
+
+- **Async server components**: a component can just `await` data before
+  rendering — no `useEffect`, no loading spinners, no client-side fetch. The
+  visitor receives finished HTML.
+- **ISR (incremental static regeneration)**: `fetch(url, { next: { revalidate:
+  3600 } })` keeps the page static and instant, but Next/Vercel silently
+  re-fetches at most hourly in the background. Static speed, fresh-ish data.
+- Next.js 16 has two caching models: the new Cache Components (`'use cache'` +
+  `cacheLife`) needs `cacheComponents: true` in next.config — without it, the
+  classic `fetch`-options model applies. Check which mode a project is in
+  before copying snippets from docs.
+- **External APIs are a dependency you don't control**: validate the response
+  shape, and design the failure path first — my fetcher returns `null` on any
+  problem and the UI falls back to the static value, so a CF outage can never
+  break the site or its build.
+
 ## 2026-06-05 — Dark mode toggle (first client component)
 
 **What I did**

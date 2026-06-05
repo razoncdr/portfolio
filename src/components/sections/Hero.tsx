@@ -1,19 +1,32 @@
 import { profile } from "@/content/profile";
 import { StatChip } from "@/components/ui/StatChip";
 import { MailIcon, icons } from "@/components/ui/icons";
+import { getCodeforcesInfo, titleCaseRank } from "@/lib/codeforces";
 
 /**
  * Above-the-fold intro. Leads with name + role, a one-line pitch, the headline
  * stats (CF rating, problems solved, ICPC rank), then the primary contact actions.
+ *
+ * Async server component: the Codeforces stat is fetched live (revalidated
+ * hourly) and overrides the static entry tagged `source: "codeforces"` in
+ * profile.ts. If the fetch fails, the static value renders instead — the live
+ * data is an enhancement, never a dependency.
  *
  * The GitHub/LinkedIn buttons are derived from profile.socials (single source of
  * truth) and resolve their glyphs via the shared icons map — no hardcoded URLs.
  */
 const HERO_LINKS = ["github", "linkedin"] as const;
 
-export function Hero() {
+export async function Hero() {
   const links = profile.socials.filter((s) =>
     HERO_LINKS.includes(s.icon as (typeof HERO_LINKS)[number])
+  );
+
+  const cf = await getCodeforcesInfo();
+  const stats = profile.stats.map((stat) =>
+    stat.source === "codeforces" && cf
+      ? { ...stat, value: `${titleCaseRank(cf.maxRank)} · max ${cf.maxRating}` }
+      : stat
   );
 
   return (
@@ -39,7 +52,7 @@ export function Hero() {
       </p>
 
       <dl className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {profile.stats.map((stat) => (
+        {stats.map((stat) => (
           <StatChip key={stat.label} label={stat.label} value={stat.value} />
         ))}
       </dl>
