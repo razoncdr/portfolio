@@ -5,6 +5,35 @@ blog section of this site.
 
 ---
 
+## 2026-06-05 — Dark mode toggle (first client component)
+
+**What I did**
+
+- Added a dark theme + toggle. The entire dark palette is one `.dark { ... }`
+  CSS block overriding the same semantic variables — zero component restyling,
+  because every component reads tokens (`bg-background`, `text-accent`, ...).
+- Built my first **client component** (`ThemeToggle`), added a pre-paint
+  inline script in `layout.tsx`, and shipped it via the full workflow:
+  `feat/dark-mode` → PR → preview → `dev` → PR → `main`.
+
+**What I learned**
+
+- Server vs client components: everything stays server-rendered except the one
+  button that needs `onClick` — the `"use client"` boundary should be as small
+  as possible.
+- The anti-FOUC pattern: a tiny blocking `<script>` runs *before paint*, reads
+  localStorage / `prefers-color-scheme`, and sets the `dark` class on `<html>`
+  — otherwise dark-mode visitors get a white flash on every load. React then
+  needs `suppressHydrationWarning` on `<html>` because the server HTML
+  (classless) legitimately differs from the client DOM.
+- Hydration-mismatch avoidance: instead of state that differs between server
+  and client, render BOTH sun/moon icons and let CSS (`dark:hidden` /
+  `dark:block`) pick — server and client markup stay identical, so there is
+  nothing to mismatch.
+- Tailwind v4 dark mode defaults to the OS setting; a class-based toggle needs
+  `@custom-variant dark (&:where(.dark, .dark *))`.
+- `color-scheme: dark` makes native scrollbars/form controls match the theme.
+
 ## 2026-06-05 — Branch protection, rulesets & a safe workflow
 
 **What I did**
