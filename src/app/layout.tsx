@@ -86,15 +86,18 @@ export default function RootLayout({
             __html: `(function(){try{var t=localStorage.getItem("theme");var d=t?t==="dark":window.matchMedia("(prefers-color-scheme: dark)").matches;if(d)document.documentElement.classList.add("dark")}catch(e){}})()`,
           }}
         />
-        {/* Skip link for keyboard / screen-reader users (WCAG 2.4.1). */}
+        {/* Skip link for keyboard / screen-reader users (WCAG 2.4.1).
+            Targets <main id="main-content"> so it works on every route. */}
         <a
-          href="#top"
+          href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:border focus:border-border focus:bg-surface focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-foreground"
         >
           Skip to content
         </a>
         <Header />
-        <main className="flex-1">{children}</main>
+        <main id="main-content" className="flex-1">
+          {children}
+        </main>
         <Footer />
       </body>
     </html>
