@@ -49,6 +49,11 @@ export type Achievement = {
   detail: string;
   /** optional profile link — category renders as a link when present */
   href?: string;
+  /**
+   * Stable discriminator for rows whose detail is overridden with live data.
+   * The static `detail` doubles as the fallback when the API is unavailable.
+   */
+  source?: "leetcode";
 };
 
 export type Education = {
@@ -70,6 +75,9 @@ export type Stat = {
    */
   source?: "codeforces" | "codechef" | "icpc" | "problems";
 };
+
+/** LeetCode username — used by the live-stats fetcher and the profile link. */
+export const leetcodeHandle = "razoncdr";
 
 export type Profile = {
   name: string;
@@ -276,6 +284,14 @@ export const profile: Profile = {
       category: "AtCoder",
       detail: "razoncdr",
       href: "https://atcoder.jp/users/razoncdr",
+    },
+    {
+      // detail below is the static FALLBACK — overridden with live API data
+      // (see lib/leetcode.ts + the Achievements component).
+      category: "LeetCode",
+      detail: "115 solved · 52 Easy · 52 Medium · 11 Hard",
+      href: `https://leetcode.com/u/${leetcodeHandle}/`,
+      source: "leetcode",
     },
   ],
   education: [

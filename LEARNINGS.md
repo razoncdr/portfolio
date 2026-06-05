@@ -5,6 +5,43 @@ blog section of this site.
 
 ---
 
+## 2026-06-06 — Live LeetCode stats (ISR, route handlers, env secrets)
+
+**What I did**
+
+- Pivoted away from "live Codeforces max rating" after realizing it was
+  *invisible dynamism*: max rating is historical, so the live value rendered
+  identically to the hardcoded one. Lesson — make things dynamic only when the
+  data actually moves. The abandoned branch cost nothing; that's what branches
+  are for.
+- Added live LeetCode solved counts (total + Easy/Medium/Hard) to Achievements,
+  fetched server-side from LeetCode's public GraphQL endpoint, with a pulsing
+  "live" dot so the freshness is visible.
+- Added a secret-protected route handler (`/api/refresh-stats?secret=...`) so I
+  can force an instant refresh after a grind session — my first API route and
+  my first environment-variable secret.
+
+**What I learned**
+
+- **ISR is lazy, not a cron**: `revalidate = 3600` doesn't poll hourly. Visitors
+  always get the cached page instantly; only when a visitor arrives *after* the
+  hour does Next serve the stale page one last time and re-fetch in the
+  background (stale-while-revalidate). Zero traffic = zero API calls; heavy
+  traffic = still ≤1 call/hour.
+- **Next's fetch-level data cache only covers GET.** GraphQL needs POST, so
+  `{ next: { revalidate } }` on the fetch wouldn't work — the right tool is the
+  route-segment config `export const revalidate = 3600` (a literal number) in
+  page.tsx, which governs when the whole static page regenerates.
+- **On-demand revalidation**: `revalidatePath("/")` in a route handler purges
+  the cache immediately. Protect such endpoints with a secret from an env var,
+  and make them **fail closed** (unset secret = refuse all requests).
+- Why I rejected a visitor-facing refresh button: browsers can't call LeetCode
+  directly (CORS), so it would need a proxy API + client state + rate limiting
+  — a real abuse surface for a number no visitor needs in realtime. Realtime UX
+  is for per-minute data (scores, prices), not slow-moving counts.
+- Secrets never go in git: `.env.local` (gitignored) locally, Vercel
+  environment variables in production.
+
 ## 2026-06-05 — Dark mode toggle (first client component)
 
 **What I did**
