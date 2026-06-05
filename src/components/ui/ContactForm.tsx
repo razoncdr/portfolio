@@ -66,8 +66,13 @@ export function ContactForm() {
             required
             maxLength={200}
             placeholder="you@example.com"
+            aria-describedby="contact-email-hint"
             className={inputClasses}
           />
+          {/* Microcopy: reassures (no spam) and nudges accuracy (it's how they hear back). */}
+          <p id="contact-email-hint" className="mt-1.5 text-xs text-subtle">
+            Only used to reply to you.
+          </p>
         </div>
       </div>
 
