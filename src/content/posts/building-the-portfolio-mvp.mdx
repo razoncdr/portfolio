@@ -1,0 +1,41 @@
+export const meta = {
+  title: "Building my portfolio MVP with Next.js 16 and Tailwind v4",
+  description:
+    "What I learned scaffolding a single-page portfolio: CSS-first Tailwind, separating data from presentation, and why semantic color tokens pay off later.",
+  date: "2026-06-03",
+};
+
+This site started as a deliberately minimal MVP: one page — hero, about,
+skills, experience, projects, achievements, education, contact — built with
+Next.js 16 (App Router), TypeScript, and Tailwind CSS v4. The goal wasn't just
+a website; it was to learn the full build-and-deploy cycle by shipping
+something real.
+
+## What I did
+
+- Scaffolded with `create-next-app` and built every section as its own server
+  component.
+- Centralized **all content in one typed file** (`src/content/profile.ts`) —
+  components never hard-code copy, so updating a rating or adding a project is
+  a one-line data edit.
+- Routed **all colors through semantic CSS variables** (`--background`,
+  `--accent`, ...) instead of using palette classes directly in components.
+- Added SEO from day one: metadata, a generated Open Graph image, sitemap,
+  robots, canonical URL.
+
+## What I learned
+
+- **Tailwind v4 is CSS-first.** There's no `tailwind.config.js` anymore — the
+  theme lives in CSS via the `@theme` directive, and custom utilities like
+  `bg-background` are generated from `--color-*` variables.
+- **Separate data from presentation.** Content edits should never touch JSX.
+  This sounds like ceremony on day one and saves you on day three.
+- **Semantic tokens are an investment.** Because every component reads
+  `bg-background` instead of `bg-white`, dark mode later became a single CSS
+  block instead of a rewrite. Decisions that cost nothing now can buy a lot
+  later — if you pick the right abstraction.
+- `next/font` self-hosts Google Fonts (no runtime requests to Google), and
+  `app/opengraph-image.tsx` generates the social-share card at build time — no
+  static image asset to maintain.
+- **`next build` is the strongest local check**: it type-checks, lints, and
+  prerenders every route in one command.

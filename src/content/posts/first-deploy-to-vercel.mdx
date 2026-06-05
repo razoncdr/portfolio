@@ -1,0 +1,34 @@
+export const meta = {
+  title: "My first deploy to Vercel — learning the deployment cycle",
+  description:
+    "From local dev server to a live URL: pushing to GitHub, importing into Vercel, and understanding production vs preview deploys.",
+  date: "2026-06-05",
+};
+
+Until this project, "deployment" was a word other people used. Here's the
+cycle I learned by actually doing it — and it turned out to be simpler than I
+expected.
+
+## What I did
+
+- Pushed the repo to GitHub and imported it into Vercel with zero
+  configuration — it auto-detected Next.js and built the site in the cloud.
+- Got a live URL within ~a minute of clicking Deploy.
+- Before publishing, **re-authored the initial commit** to scrub a work email
+  from the git history.
+
+## What I learned
+
+- **The cycle is the whole thing:** `edit → commit → push → Vercel builds →
+  live`. Pushing to `main` produces a **production** deploy; pushing any other
+  branch (or opening a PR) produces a **preview** deploy with its own URL — a
+  disposable copy of your site for checking changes before they go live.
+- **No env vars were needed for correct absolute URLs.** Vercel injects
+  `VERCEL_PROJECT_PRODUCTION_URL` automatically, which the code uses to build
+  OG/sitemap/robots URLs. Design your URL handling around environment-provided
+  values and deploys "just work."
+- **Commit author email is permanent, public metadata** once pushed. Set
+  `git config user.email` *before* your first push — or amend before
+  publishing, like I had to.
+- **Deploys are immutable snapshots.** That's why Vercel's "Instant Rollback"
+  is instant: it just points production back at a previous build.

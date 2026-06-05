@@ -1,0 +1,41 @@
+export const meta = {
+  title: "Protecting production from everyone — including me and my AI",
+  description:
+    "Branch rulesets, a main/dev/feat workflow, and AI guardrails: how I made unintentional force-pushes, merges, and deletions impossible.",
+  date: "2026-06-05",
+};
+
+Once my portfolio became a *production system* — `main` auto-deploys to the
+live site — I wanted guarantees that nobody could break it unintentionally.
+Not me at 2 AM, not a future teammate, not the AI agent I build with.
+
+## What I did
+
+- Created GitHub **rulesets**: `protect-main` (PR-only, force-pushes and
+  deletions blocked, Vercel build check required) and `protect-dev`
+  (force-pushes and deletions blocked, direct pushes allowed).
+- Adopted the branch model `main` (production) ← `dev` (integration) ←
+  `feat/*` (features).
+- Added AI guardrails to the repo: a hook that hard-blocks destructive git
+  operations and forces explicit approval for every push, plus a written
+  contract in `AGENTS.md` that any AI session reads first.
+- Tested the armor by attempting a direct push to `main` with full
+  credentials — GitHub refused it with `GH013: Changes must be made through a
+  pull request`.
+
+## What I learned
+
+- **Rulesets are server-side and actor-blind.** GitHub itself refuses the
+  operation, so it doesn't matter *who* attempts it — human, AI, script, or
+  leaked token. Client-side guardrails are convenience; server-side rules are
+  the guarantee.
+- **Git cannot delete a repository.** Only the web UI (with typed
+  confirmation) or an API token with a special scope can. The realistic risks
+  are force-pushes (history rewrites) and accidental pushes to production —
+  exactly what rulesets block.
+- **"Require deployments to succeed (Production)" is a trap** on `main`:
+  production deploys only happen *after* merging, so the rule deadlocks every
+  PR. The right gate is a required **status check** (the Vercel build).
+- A required status check only becomes selectable in GitHub's UI after it has
+  run at least once on a PR — create the ruleset first, add the check after
+  your first PR.

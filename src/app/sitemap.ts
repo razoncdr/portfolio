@@ -1,11 +1,14 @@
 import type { MetadataRoute } from "next";
 import { siteUrl } from "@/lib/site";
+import { getAllPosts } from "@/content/posts";
 
 /**
- * Single-page sitemap for now. When new routes are added (e.g. a blog index in a
- * later phase), append them here — Next generates /sitemap.xml automatically.
+ * Home + blog index + every post. Because this is generated from the post
+ * registry, new posts join the sitemap automatically — nothing to maintain.
  */
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const posts = await getAllPosts();
+
   return [
     {
       url: siteUrl,
@@ -13,5 +16,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 1,
     },
+    {
+      url: `${siteUrl}/blog`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    ...posts.map((post) => ({
+      url: `${siteUrl}/blog/${post.slug}`,
+      lastModified: new Date(`${post.date}T00:00:00Z`),
+      changeFrequency: "yearly" as const,
+      priority: 0.6,
+    })),
   ];
 }
