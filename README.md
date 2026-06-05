@@ -46,6 +46,10 @@ happen in one place.
 | Variable | Purpose |
 |---|---|
 | `NEXT_PUBLIC_SITE_URL` | Your production URL (e.g. `https://your-domain.com`). Used by `metadataBase`, the sitemap, robots, and OG image to emit absolute URLs. Set it in **Vercel → Settings → Environment Variables** (Production + Preview). Falls back to Vercel's own URL, then `localhost`. |
+| `REVALIDATE_SECRET` | Protects `/api/refresh-stats` (owner-only on-demand cache refresh). Endpoint refuses everything if unset. |
+| `RESEND_API_KEY` | Resend API key for the contact form. Form returns a friendly error (with the direct-email fallback) if unset. |
+| `CONTACT_EMAIL` | Where contact-form messages are delivered. Server-only — never exposed to the browser. |
+| `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | Optional: enables per-IP rate limiting (5/hour) on the contact form. Limiter fails open without them. |
 
 ## Deploy
 
@@ -62,4 +66,4 @@ Planned phases (structured so each slots in cleanly):
 - [x] Dark / light mode toggle
 - [x] Live LeetCode stats (public GraphQL API + ISR; replaced the original live-Codeforces idea)
 - [x] MDX blog / writing section (`/blog`, posts in `src/content/posts/`)
-- [ ] Contact form (route handler + Resend/Formspree)
+- [x] Contact form (Server Action + Resend, honeypot + per-IP rate limiting)
