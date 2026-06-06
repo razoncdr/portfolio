@@ -12,6 +12,8 @@
  * UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN env vars exist.
  */
 
+import { log } from "@/lib/logger";
+
 const WINDOW_SECONDS = 3600; // 1 hour
 const MAX_PER_WINDOW = 5;
 
@@ -37,13 +39,17 @@ export async function checkRateLimit(
         ["EXPIRE", key, WINDOW_SECONDS, "NX"],
       ]),
     });
-    if (!res.ok) return { allowed: true, configured: true };
+    if (!res.ok) {
+      log.warn("ratelimit.error", { status: res.status });
+      return { allowed: true, configured: true };
+    }
 
     const results = (await res.json()) as { result?: unknown }[];
     const count = Number(results?.[0]?.result ?? 0);
     return { allowed: count <= MAX_PER_WINDOW, configured: true };
   } catch {
     // Redis hiccup shouldn't take the contact form down with it.
+    log.warn("ratelimit.error", { status: "network" });
     return { allowed: true, configured: true };
   }
 }
