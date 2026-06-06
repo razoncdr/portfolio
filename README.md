@@ -49,7 +49,7 @@ happen in one place.
 | `REVALIDATE_SECRET` | Protects `/api/refresh-stats` (owner-only on-demand cache refresh). Endpoint refuses everything if unset. |
 | `RESEND_API_KEY` | Resend API key for the contact form. Form returns a friendly error (with the direct-email fallback) if unset. |
 | `CONTACT_EMAIL` | Where contact-form messages are delivered. Server-only — never exposed to the browser. |
-| `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | Optional: enables per-IP rate limiting (5/hour) on the contact form. Limiter fails open without them. |
+| `KV_REST_API_URL` / `KV_REST_API_TOKEN` | Optional: enables per-IP rate limiting (5/hour) on the contact form. Auto-injected by Vercel's Upstash (Redis) integration; the limiter also accepts `UPSTASH_REDIS_REST_URL`/`_TOKEN`. Fails open without them. |
 
 ## Deploy
 

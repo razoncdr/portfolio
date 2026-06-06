@@ -5,6 +5,36 @@ blog section of this site.
 
 ---
 
+## 2026-06-06 — Production logging & rate limiting (observability)
+
+**What I did**
+
+- Built a tiny structured logger (single JSON line per event → stdout) and
+  wired it through every server path: contact form outcomes (sent / rejected /
+  honeypot / rate_limited / send_failed), the refresh endpoint (triggered /
+  denied — an audit trail for a privileged endpoint), LeetCode fetch failures,
+  and Redis hiccups.
+- Activated the per-IP rate limit by connecting Upstash Redis (the limiter
+  code shipped earlier, failing open until credentials existed).
+
+**What I learned**
+
+- **Structured logs beat prose logs**: `{"event":"contact.rate_limited",
+  "ip":...}` is filterable/searchable in Vercel's log dashboard; "someone got
+  rate limited!!" is not. Stable, dot-namespaced event names are the schema.
+- **Logs answer questions you didn't know you'd ask**: is the form being
+  abused (rate_limited spikes)? did LeetCode's API break (fetch_failed before
+  any visitor notices)? who's probing my refresh endpoint (denied + IP)?
+- **What NOT to log matters as much**: never secrets, never full message
+  bodies (logs are readable by anyone with dashboard access). IPs are personal
+  data — logging them for abuse-attribution is standard and legitimate, but
+  it's a deliberate decision, not a default.
+- On Vercel, stdout/stderr just *is* the logging pipeline — `console.log` of a
+  JSON line lands in the Logs dashboard. Long retention/alerting is a later
+  bolt-on (log drains), not a rewrite.
+- Levels map to streams: info → stdout, warn/error → stderr; dashboards
+  color/filter by them natively.
+
 ## 2026-06-06 — Contact form (Server Actions, spam defense, real secrets)
 
 **What I did**

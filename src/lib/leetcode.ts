@@ -1,4 +1,5 @@
 import { leetcodeHandle } from "@/content/profile";
+import { log } from "@/lib/logger";
 
 export type LeetcodeStats = {
   total: number;
@@ -38,7 +39,10 @@ export async function getLeetcodeStats(): Promise<LeetcodeStats | null> {
         variables: { username: leetcodeHandle },
       }),
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      log.warn("leetcode.fetch_failed", { reason: `http_${res.status}` });
+      return null;
+    }
 
     const data: unknown = await res.json();
     const counts = (
@@ -52,7 +56,10 @@ export async function getLeetcodeStats(): Promise<LeetcodeStats | null> {
         };
       }
     ).data?.matchedUser?.submitStatsGlobal?.acSubmissionNum;
-    if (!Array.isArray(counts)) return null;
+    if (!Array.isArray(counts)) {
+      log.warn("leetcode.fetch_failed", { reason: "unexpected_shape" });
+      return null;
+    }
 
     const byDifficulty = new Map<string, number>();
     for (const entry of counts) {
@@ -71,11 +78,13 @@ export async function getLeetcodeStats(): Promise<LeetcodeStats | null> {
       medium === undefined ||
       hard === undefined
     ) {
+      log.warn("leetcode.fetch_failed", { reason: "missing_counts" });
       return null;
     }
 
     return { total, easy, medium, hard };
   } catch {
+    log.warn("leetcode.fetch_failed", { reason: "network" });
     return null;
   }
 }
