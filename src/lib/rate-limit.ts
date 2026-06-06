@@ -8,9 +8,13 @@
  *
  * Behavior without configuration: fails OPEN (allows the request). The
  * honeypot + validation + Resend's daily cap still protect the form, so the
- * site works out of the box and tightens automatically once the
- * UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN env vars exist.
+ * site works out of the box and tightens automatically once the credentials
+ * exist. Vercel's Upstash integration injects them as KV_REST_API_URL /
+ * KV_REST_API_TOKEN; we also accept the UPSTASH_REDIS_REST_* names for a
+ * hand-configured store. (Use the read-WRITE token — INCR is a write.)
  */
+
+import { log } from "@/lib/logger";
 
 const WINDOW_SECONDS = 3600; // 1 hour
 const MAX_PER_WINDOW = 5;
@@ -18,8 +22,9 @@ const MAX_PER_WINDOW = 5;
 export async function checkRateLimit(
   key: string
 ): Promise<{ allowed: boolean; configured: boolean }> {
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  const url = process.env.KV_REST_API_URL ?? process.env.UPSTASH_REDIS_REST_URL;
+  const token =
+    process.env.KV_REST_API_TOKEN ?? process.env.UPSTASH_REDIS_REST_TOKEN;
   if (!url || !token) {
     return { allowed: true, configured: false };
   }
@@ -37,13 +42,17 @@ export async function checkRateLimit(
         ["EXPIRE", key, WINDOW_SECONDS, "NX"],
       ]),
     });
-    if (!res.ok) return { allowed: true, configured: true };
+    if (!res.ok) {
+      log.warn("ratelimit.error", { status: res.status });
+      return { allowed: true, configured: true };
+    }
 
     const results = (await res.json()) as { result?: unknown }[];
     const count = Number(results?.[0]?.result ?? 0);
     return { allowed: count <= MAX_PER_WINDOW, configured: true };
   } catch {
     // Redis hiccup shouldn't take the contact form down with it.
+    log.warn("ratelimit.error", { status: "network" });
     return { allowed: true, configured: true };
   }
 }

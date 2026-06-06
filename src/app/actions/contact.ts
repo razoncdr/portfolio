@@ -2,6 +2,7 @@
 
 import { headers } from "next/headers";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { log } from "@/lib/logger";
 
 /**
  * Server Action handling contact-form submissions.
@@ -15,6 +16,9 @@ import { checkRateLimit } from "@/lib/rate-limit";
  *  4. Hardcoded recipient (CONTACT_EMAIL env var, server-only) — visitors
  *     control the message content, never the destination.
  *  5. Resend's free-tier daily cap is the final circuit breaker.
+ *
+ * Every outcome emits a structured log event (see lib/logger.ts) so abuse and
+ * failures are visible in Vercel's logs. Message bodies are never logged.
  */
 
 export type ContactState = {
@@ -31,8 +35,14 @@ export async function sendContactMessage(
   _prev: ContactState,
   formData: FormData
 ): Promise<ContactState> {
+  const startedAt = Date.now();
+  const requestHeaders = await headers();
+  const ip =
+    requestHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+
   // 1. Honeypot — silently "succeed" for bots.
   if (typeof formData.get("website") === "string" && formData.get("website")) {
+    log.warn("contact.honeypot", { ip });
     return { status: "success", message: "Thanks! I'll get back to you soon." };
   }
 
@@ -42,12 +52,15 @@ export async function sendContactMessage(
   const message = String(formData.get("message") ?? "").trim();
 
   if (!name || name.length > MAX_NAME) {
+    log.info("contact.rejected", { ip, reason: "name" });
     return { status: "error", message: "Please enter your name." };
   }
   if (!/^\S+@\S+\.\S+$/.test(email) || email.length > MAX_EMAIL) {
+    log.info("contact.rejected", { ip, reason: "email" });
     return { status: "error", message: "Please enter a valid email address." };
   }
   if (message.length < MIN_MESSAGE || message.length > MAX_MESSAGE) {
+    log.info("contact.rejected", { ip, reason: "message_length" });
     return {
       status: "error",
       message: `Please write a message between ${MIN_MESSAGE} and ${MAX_MESSAGE} characters.`,
@@ -55,11 +68,9 @@ export async function sendContactMessage(
   }
 
   // 3. Per-IP rate limit (no-ops gracefully if Upstash isn't configured).
-  const requestHeaders = await headers();
-  const ip =
-    requestHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
   const limit = await checkRateLimit(`contact:${ip}`);
   if (!limit.allowed) {
+    log.warn("contact.rate_limited", { ip });
     return {
       status: "error",
       message:
@@ -71,6 +82,7 @@ export async function sendContactMessage(
   const apiKey = process.env.RESEND_API_KEY;
   const to = process.env.CONTACT_EMAIL;
   if (!apiKey || !to) {
+    log.error("contact.unconfigured", { ip });
     // Fail closed but helpfully: the direct links below the form still work.
     return {
       status: "error",
@@ -97,6 +109,7 @@ export async function sendContactMessage(
     });
 
     if (!res.ok) {
+      log.error("contact.send_failed", { ip, status: res.status });
       return {
         status: "error",
         message:
@@ -104,8 +117,14 @@ export async function sendContactMessage(
       };
     }
 
+    log.info("contact.sent", {
+      ip,
+      rateLimited: limit.configured,
+      ms: Date.now() - startedAt,
+    });
     return { status: "success", message: "Thanks! I'll get back to you soon." };
   } catch {
+    log.error("contact.send_failed", { ip, status: "network" });
     return {
       status: "error",
       message:
